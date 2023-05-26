@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react';
-import ErrorBoundary from 'shared/App/ErrorBoundary';
+import ErrorBoundary from 'shared/app/ErrorBoundary';
 import ProgressBar from 'react-topbar-progress-indicator';
 
 const loadable = (importFunc, fallback = <ProgressBar />) => {

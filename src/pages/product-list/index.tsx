@@ -14,13 +14,11 @@ import { getProducts } from 'features/product/productSlice';
 import { AiFillDelete } from 'react-icons/ai';
 import { BiEdit } from 'react-icons/bi';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Table, PageHeader, Pagination } from 'shared/components';
 
 // utils
 import { DEFAULT_PARAMS } from 'shared/configs/constants';
-
-const { confirm } = Modal;
 
 const columns = [
   {
@@ -45,9 +43,11 @@ const columns = [
   },
 ];
 
-export default function ProductList() {
+function ProductList() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [openFilter, setOpenFilter] = useState(false);
   const [paramSearch, setParamSearch] = useState({
@@ -86,7 +86,7 @@ export default function ProductList() {
     type: 'multiple' | 'single';
     ids: React.Key[];
   }) => {
-    confirm({
+    Modal.confirm({
       icon: true,
       title: 'Xóa tủ trung tâm?',
       content:
@@ -134,12 +134,11 @@ export default function ProductList() {
       children: t('action.add'),
       type: 'primary',
       onClick: () => {
-        // navigate(`add`, {
-        //   state: {
-        //     ...location.state,
-        //     [PAGE_KEY]: { filter: paramSearch },
-        //   },
-        // }),
+        navigate(`add`, {
+          state: {
+            ...location.state,
+          },
+        });
       },
     },
   ];
@@ -186,3 +185,5 @@ export default function ProductList() {
     </div>
   );
 }
+
+export default ProductList;

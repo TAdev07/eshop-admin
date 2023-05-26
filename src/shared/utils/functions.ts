@@ -18,10 +18,10 @@ export const arrayToTreeHash = (
 export const getShortName = (name) => {
   const split = name.split(' ');
   if (split.length > 1) {
-    let s = split[0][0] + (split.at(-1).at(0) || '');
+    const s = split[0][0] + (split.at(-1).at(0) || '');
     return s.toUpperCase();
   }
-  return name?.[0]?.toUpperCase()|| '';
+  return name?.[0]?.toUpperCase() || '';
 };
 
 export const checkAuthority =
@@ -102,21 +102,21 @@ export function getArrayValue(item) {
 }
 export function getScrollItemsHeight(insideTab) {
   let h = 0;
-  let items = document.getElementsByClassName('scroll-caculate-item');
-  let tabItems = document.getElementsByClassName('ant-tabs-nav');
+  const items = document.getElementsByClassName('scroll-caculate-item');
+  const tabItems = document.getElementsByClassName('ant-tabs-nav');
   for (let i = 0; i < items.length; i++) {
     h += items[i].clientHeight;
   }
   if (insideTab && tabItems?.length)
     for (let i = 0; i < tabItems.length; i++) {
-      let tabH = tabItems[i].clientHeight + 16;
+      const tabH = tabItems[i].clientHeight + 16;
       h += tabH;
     }
   return h;
 }
 export function getScrollFormItemsHeight() {
   let h = 0;
-  let items = document.getElementsByClassName('scroll-form-caculate-item');
+  const items = document.getElementsByClassName('scroll-form-caculate-item');
   for (let i = 0; i < items.length; i++) {
     h += items[i].clientHeight;
   }
@@ -130,9 +130,9 @@ export const trimAll = (obj) => {
   return obj;
 };
 export const removeNullAll = (obj) => {
-  const p= {...obj}
+  const p = { ...obj };
   Object.keys(obj).forEach((k) => {
-    if ( !obj[k]) delete p[k]
+    if (!obj[k]) delete p[k];
   });
   return p;
 };
@@ -165,10 +165,10 @@ export const listToTree = (
   return res;
 };
 
-export const getBase64 = file =>
+export const getBase64 = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
+    reader.onerror = (error) => reject(error);
   });

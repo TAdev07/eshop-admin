@@ -1,8 +1,12 @@
+import React from 'react';
 import loadable from 'shared/utils/loadable';
 import { RouteObject } from 'react-router-dom';
 import { menu } from './menu';
 
-const ProductList = loadable(() => import('pages/product-list/index'));
+const ProductList = loadable(() => import('pages/product-list'));
+const ProductDetail = loadable(
+  () => import('pages/product-list/product-detail'),
+);
 
 import MainLayout from 'shared/layout/main/MainLayout';
 import AddCoupon from 'pages/AddCoupon';
@@ -136,7 +140,20 @@ const routes: RouteObject = {
         },
         {
           path: 'list-product',
-          element: <ProductList />,
+          children: [
+            {
+              index: true,
+              element: <ProductList />,
+            },
+            {
+              path: 'add',
+              element: <ProductDetail />,
+            },
+            {
+              path: ':id',
+              element: <ProductDetail />,
+            },
+          ],
         },
         {
           path: 'product',

@@ -22,7 +22,7 @@ const MainLayout = ({ menuData }: MainLayoutProps) => {
   const navigate = useNavigate();
   return (
     <Layout>
-      <Sider theme="dark" trigger={null} collapsible collapsed={collapsed}>
+      <Sider theme="light" trigger={null} collapsible collapsed={collapsed}>
         <div className="logo">
           <h2 className="text-white fs-5 text-center py-3 mb-0">
             <span className="sm-logo">ES</span>
@@ -30,7 +30,6 @@ const MainLayout = ({ menuData }: MainLayoutProps) => {
           </h2>
         </div>
         <Menu
-          theme="dark"
           mode="inline"
           defaultSelectedKeys={['']}
           onClick={({ key }) => {
