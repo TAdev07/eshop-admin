@@ -15,10 +15,16 @@ import { AiFillDelete } from 'react-icons/ai';
 import { BiEdit } from 'react-icons/bi';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Table, PageHeader, Pagination } from 'shared/components';
+import {
+  Table,
+  PageHeader,
+  Pagination,
+  CustomColumns,
+} from 'shared/components';
 
 // utils
 import { DEFAULT_PARAMS } from 'shared/configs/constants';
+import { useColumnTable } from 'shared/hooks';
 
 const columns = [
   {
@@ -49,6 +55,10 @@ function ProductList() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [columnTable, setColumnConfig] = useColumnTable('product-list', {
+    columns,
+  });
+
   const [openFilter, setOpenFilter] = useState(false);
   const [paramSearch, setParamSearch] = useState({
     ...DEFAULT_PARAMS,
@@ -56,6 +66,7 @@ function ProductList() {
   });
   const [paging, setPaging] = useState({ total: 10, current: 1, pageSize: 20 });
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [openCustom, setOpenCustom] = useState(false);
 
   const isFilter = () => {
     return false;
@@ -176,11 +187,20 @@ function ProductList() {
         buttons={buttons}
         className="scroll-caculate-item scroll-caculate-item-treenav"
       />
-      <Table actions={actions} columns={columns} dataSource={data1} />
+      <Table actions={actions} columns={columnTable} dataSource={data1} />
       <Pagination
         onChange={onPaginate}
         {...paging}
         className="scroll-caculate-item"
+      />
+      <CustomColumns
+        open={openCustom}
+        columnTable={columnTable}
+        screenType={'product-list'}
+        onClose={() => setOpenCustom(false)}
+        onOk={(e) => {
+          setColumnConfig(e);
+        }}
       />
     </div>
   );
