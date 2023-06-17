@@ -7,8 +7,8 @@ type BoxProps = {
   justify?: CSSProperties['justifyContent'];
   items?: CSSProperties['alignItems'];
   direction?: CSSProperties['flexDirection'];
-  gap?: string | number;
   flex?: string | number;
+  gap?: string;
 
   padding?: string;
   paddingTop?: string;
@@ -31,11 +31,22 @@ type BoxProps = {
 
   color?: string;
   fontSize?: string;
+  fontWeight?: string | number;
   bgColor?: string;
 
   borderRadius?: string;
+  border?: string;
+  borderWidth?: string;
   children?: React.ReactNode;
-  className?: string;
+
+  position?: CSSProperties['position'];
+  top?: string;
+  bottom?: string;
+  left?: string;
+  right?: string;
+  zIndex?: number;
+
+  cursor?: CSSProperties['cursor'];
 };
 
 export const Box: React.FC<BoxProps> = styled.div`
@@ -55,11 +66,24 @@ export const Box: React.FC<BoxProps> = styled.div`
   justify-content: ${(props) => props.justify};
   align-items: ${(props) => props.items};
   flex-direction: ${(props) => props.direction};
-  gap: ${(props) => props.gap};
   flex: ${(props) => props.flex};
+  gap: ${(props) => props.gap};
 
   height: ${(props) => props.height};
   width: ${(props) => props.width};
   border-radius: ${(props) => props.borderRadius};
+  border: ${(props) => props.border};
+  border-width: ${(props) => props.borderWidth};
   background-color: ${(props) => props.bgColor};
+  color: ${(props) => props.color};
+  font-size: ${(props) => props.fontSize};
+  font-weight: ${(props) => props.fontWeight};
+
+  cursor: ${(props) => props.cursor};
+  position: ${(props) => props.position};
+  top: ${(props) => props.top};
+  bottom: ${(props) => props.bottom};
+  left: ${(props) => props.left};
+  right: ${(props) => props.right};
+  z-index: ${(props) => props.zIndex};
 `;

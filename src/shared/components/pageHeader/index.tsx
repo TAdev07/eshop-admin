@@ -1,19 +1,20 @@
+import useUrlState from '@ahooksjs/use-url-state';
 import { ArrowLeftOutlined, LoadingOutlined } from '@ant-design/icons';
 import { Button, Input, Typography } from 'antd';
 import React, { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { Box } from '../box';
-import { breakpoint } from 'shared/utils/breakpoint';
-
+import { Center, VCenter } from '../common';
+import { breakpoint } from 'shared/themes/utils';
+import { debounce } from 'lodash';
 type PageHeaderProps = {
   children?: React.ReactNode;
   title?: string;
   titleContent?: React.ReactNode;
   showSearch?: boolean;
   onSearch?: any;
-  onSearchDebounce?: any;
+  debounceSearch?: boolean;
   searchPlaceholder?: string;
   searchDefaultValue?: string;
   searchValue?: string;
@@ -40,7 +41,7 @@ export const PageHeader = ({
   titleContent,
   showSearch,
   onSearch,
-  onSearchDebounce,
+  debounceSearch = true,
   searchPlaceholder,
   searchDefaultValue = '',
   searchValue,
@@ -53,8 +54,7 @@ export const PageHeader = ({
   const { t } = useTranslation();
   const searchRef = useRef(null);
   const navigate = useNavigate();
-  const params = useParams();
-
+  const [params, setParams] = useUrlState();
   const onBlur = (e: { target: { value: string } }) => {
     if (
       searchValue !== undefined &&
@@ -66,7 +66,6 @@ export const PageHeader = ({
       });
     }
   };
-
   const onBackBtnClick = () => {
     if (onBack) {
       onBack();
@@ -76,26 +75,29 @@ export const PageHeader = ({
       } else navigate(-1);
     }
   };
-
   const renderButtons = useMemo(() => {
     if (buttons && buttons.length > 0) {
       return React.Children.toArray(
-        buttons.map(({ children, icon, loading, onClick, ...rest }) => (
+        buttons.map(({ children, icon, loading, onClick, ...rest }: any) => (
           <Button {...rest} onClick={!loading && onClick}>
-            <Box display="flex" items="center" gap='6px' >
+            <Center style={{ gap: 6 }}>
               {!loading ? icon : <LoadingOutlined />}
               {children}
-            </Box>
+            </Center>
           </Button>
         )),
       );
     } else return null;
   }, [buttons]);
-
+  const onSearchChange = debounce((e) => {
+    if (debounceSearch && onSearch) {
+      onSearch(e.target.value.trim());
+    }
+  }, 500);
   return (
     <Container {...rest}>
       <div className="PageHeader-root">
-        <Box display="flex" items="center" gap={8} className="PageHeader-left">
+        <VCenter className="PageHeader-left" style={{ gap: 8 }}>
           {showBackButton && (
             <Button
               size="large"
@@ -115,7 +117,12 @@ export const PageHeader = ({
                   level={4}
                   ellipsis
                   className="PageHeader-title"
-                  style={{ marginBottom: 0 }}
+                  css={`
+                    margin-bottom: 0 !important;
+                    display: block;
+                    ${breakpoint()(`display: none;
+                      `)}
+                  `}
                 >
                   {title}
                 </Typography.Title>
@@ -126,7 +133,7 @@ export const PageHeader = ({
             <Input.Search
               ref={searchRef}
               onSearch={onSearch}
-              onChange={onSearchDebounce}
+              onChange={onSearchChange}
               placeholder={searchPlaceholder ?? t('form.search')}
               defaultValue={searchDefaultValue}
               onBlur={onBlur}
@@ -134,19 +141,19 @@ export const PageHeader = ({
               style={{ width: 'auto' }}
             />
           )}
-        </Box>
+        </VCenter>
         {(children || buttons.length > 0) && (
-          <Box
-            display="flex"
-            items="center"
-            gap="8px"
-            flex={1}
-            justify="flex-end"
+          <VCenter
+            style={{
+              gap: 8,
+              flex: 1,
+              justifyContent: 'flex-end',
+            }}
             className="PageHeader-right"
           >
             {renderButtons}
             {children}
-          </Box>
+          </VCenter>
         )}
       </div>
     </Container>

@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useWindowSize } from 'react-use';
+import { useSize } from 'ahooks';
 import { Form as AntForm } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { getScrollFormItemsHeight } from 'shared/utils';
@@ -37,18 +37,19 @@ const CustomFormData = styled.div.attrs(
  *  to make table sticky header and not make body overflow scroll
  * @returns
  */
-export const FormWrapper = ({
+export const Wrapper = ({
   height = 'fix-scroll',
+  insideTab = false,
   offsetBottom = 20,
   ...rest
 }) => {
   const [formHeight, setFormHeight] = useState(height);
-  const size = useWindowSize();
+  const size = useSize(document.querySelector('body'));
   useEffect(() => {
     if (height === 'fix-scroll') {
       setTimeout(() => {
         setFormHeight(
-          `calc(100vh - ${getScrollFormItemsHeight()} - ${offsetBottom}px)`,
+          `calc(100vh - ${getScrollFormItemsHeight(insideTab)} - ${offsetBottom}px)`,
         );
       }, 200);
     } else {

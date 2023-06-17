@@ -1,15 +1,15 @@
-import { useLocalStorage } from 'react-use';
+import { useLocalStorageState } from 'ahooks';
 import { useCallback, useMemo } from 'react';
 import { LocalStorageKey } from 'shared/services';
 
 export function useColumnTable(key, { columns, keyExpr = 'dataIndex' }) {
-  const [config, setConfig] = useLocalStorage(
+  const [config, setConfig] = useLocalStorageState(
     `${LocalStorageKey.COLUMNS_CONFIG}_${key}`,
     {
       defaultValue: null,
     },
   );
-  const setNewConfig = useCallback((newVal) => {
+  let setNewConfig = useCallback((newVal) => {
     setConfig(newVal);
     return newVal.reduce((total, cur) => {
       const found = columns.find((d) => d[keyExpr] === cur.key);

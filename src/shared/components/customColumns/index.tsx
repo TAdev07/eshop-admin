@@ -43,6 +43,8 @@ export const CustomColumns = ({
       });
     }
   };
+  const fixedColumns = [...dataSource.filter((item) => item.type === 'fixed')];
+  const cols = [...dataSource.filter((item) => item.type !== 'fixed')];
 
   return (
     <Drawer
@@ -97,7 +99,15 @@ export const CustomColumns = ({
               items={dataSource.map((i) => i[keyExpr])}
               strategy={verticalListSortingStrategy}
             >
-              {dataSource?.map((item) => (
+              {fixedColumns?.map((item) => (
+                <SortableItem
+                  sortable={false}
+                  key={item[keyExpr]}
+                  item={item}
+                  id={item[keyExpr]}
+                />
+              ))}
+              {cols.map((item) => (
                 <SortableItem
                   key={item[keyExpr]}
                   item={item}

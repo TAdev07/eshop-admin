@@ -1,4 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import { useSize } from 'ahooks';
+import {
+  Table as AntdTable,
+  Button,
+  Checkbox,
+  Popover,
+  Tag,
+  Tooltip,
+} from 'antd';
+import dayjs from 'dayjs';
+import { findIndex, get, uniq, map } from 'lodash';
 import React, {
   useCallback,
   useEffect,
@@ -6,17 +17,17 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import dayjs from 'dayjs';
-import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { useWindowSize } from 'react-use';
-import { findIndex, get } from 'lodash';
-
-// component
-import { Table as AntdTable, Button, Checkbox, Tooltip } from 'antd';
 import { Link } from 'react-router-dom';
 import { getScrollItemsHeight } from 'shared/utils/functions';
+import styled from 'styled-components';
 import { Box } from '../box';
+
+const convertAlignToJustify = {
+  left: 'flex-start',
+  right: 'flex-end',
+  center: 'center',
+};
 
 const CustomGridData = styled(AntdTable)`
   box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.06);
@@ -35,6 +46,7 @@ const CustomGridData = styled(AntdTable)`
   thead tr th:first-child.ant-table-selection-column {
     padding-left: 12px !important;
   }
+
   && .ant-table-body {
     overflow-y: overlay !important;
     ::-webkit-scrollbar,
@@ -83,15 +95,46 @@ const CustomGridData = styled(AntdTable)`
     }
   }
 `;
+export const Item = styled.div`
+  // background-color: ${(props) => props.theme.colorBorderSecondary};
+  border-radius: 10px;
+  padding: 2px 8px;
+  display: flex;
+  justify-content: space-between;
+  min-width: 180px;
+  align-items: center;
+`;
+const LinkName = styled.div`
+  // width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 1;
+  height: 25px;
+  -webkit-box-orient: vertical;
+`;
+const LinkNumber = styled.div`
+  background: rgba(60, 60, 67, 0.1);
+  border-radius: 18px;
+  min-width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  :hover {
+    cursor: pointer;
+  }
+`;
+const RowNumber = styled.div`
+  display: flex;
+`;
 
 /**
  *
  * @param {height} height : if pass height value as 'fix-scroll',
- *  the height of table is calculate base on document height minus height of scroll items like header, footer
+ *  the height of table is caulate base on document height minus height of scrol items like header, footer
  *  to make table sticky header and not make body overflow scroll
  * @returns
  */
-
 const dataTypeRender = ({
   render,
   dataType = 'string',
@@ -99,18 +142,52 @@ const dataTypeRender = ({
   dataIndex,
   buttons,
   to,
+  linkProps = {},
+  popoverProps = { trigger: 'hover' },
+  align,
+  arrayProps = {},
 }) => {
   if (render) return render;
   else {
     switch (dataType) {
+      case 'array':
+        var { displayExpr = 'name' } = arrayProps;
+        return (_, record) => {
+          const arr = get(record, dataIndex, []) || [];
+          if (arr?.length <= 0) return null;
+          else {
+            let val = arr.map((d) => {
+              const label =
+                typeof displayExpr == 'function'
+                  ? displayExpr(d)
+                  : get(d, displayExpr);
+              return label;
+            });
+            val = uniq(val);
+            const first = val.shift();
+            if (val?.length > 0) {
+              const content = val.map((d, i) => <p key={i}>{d}</p>);
+              return (
+                <>
+                  {first}{' '}
+                  <Popover content={content} placement="bottom">
+                    <Tag>+{val.length}</Tag>
+                  </Popover>
+                </>
+              );
+            } else return first;
+          }
+        };
       case 'link':
-        return (text: any, record: any) => {
+        return (text, record) => {
           return (
             <Link
-              to={to(record)}
+              {...linkProps}
+              to={
+                (to && to(record)) || (linkProps?.to && linkProps?.to(record))
+              }
               css={`
-                color: ${(props: { theme: { colorPrimary: any } }) =>
-                  props.theme.colorPrimary};
+                color: ${(props) => props.theme.colorPrimary};
               `}
             >
               {text}
@@ -118,44 +195,48 @@ const dataTypeRender = ({
           );
         };
       case 'date':
-        return (_: any, record: any) => {
+        return (_, record) => {
           const value = get(record, dataIndex);
           return value && dayjs(value).format(format || 'DD/MM/YYYY');
         };
       case 'datetime':
-        return (_: any, record: any) => {
+        return (_, record) => {
           const value = get(record, dataIndex);
           return value && dayjs(value).format(format || 'HH:mm DD/MM/YYYY');
         };
       case 'time':
-        return (_: any, record: any) => {
+        return (_, record) => {
           const value = get(record, dataIndex);
           return value && dayjs(value).format(format || 'HH:mm');
         };
       case 'number':
-        return (_: any, record: any) => {
+        return (_, record) => {
           const value = get(record, dataIndex);
           return value && new Intl.NumberFormat('vi-VN', format).format(value);
         };
       case 'boolean':
-        return (_: any, record: any) => {
+        return (_, record) => {
           const value = get(record, dataIndex);
           return <Checkbox checked={value} />;
         };
       case 'object':
-        return (_: any, record: any) => {
+        return (_, record) => {
           const value = get(record, dataIndex);
           return value && JSON.stringify(value);
         };
       case 'buttons':
-        return (text: any, record: { id: any }, index: any) => (
-          <Box>
+        return (text, record, index) => (
+          <Box
+            display="flex"
+            items="center"
+            justify={convertAlignToJustify[align]}
+          >
             {React.Children.toArray(
               buttons.map(
                 ({
                   onClick,
                   title = '',
-                  loadingId,
+                  loadingExpr,
                   disabled = false,
                   visible = () => true,
                   ...rest
@@ -164,7 +245,7 @@ const dataTypeRender = ({
                     <Tooltip title={title}>
                       <Button
                         {...rest}
-                        loading={loadingId === record.id}
+                        loading={loadingExpr && loadingExpr(record)}
                         type="text"
                         shape="circle"
                         onClick={(event) =>
@@ -178,12 +259,74 @@ const dataTypeRender = ({
             )}
           </Box>
         );
+      case 'popovers':
+        var {
+          onItemClick,
+          keyExpr = 'id',
+          displayExpr = 'name',
+          ...props
+        } = popoverProps;
+        return (text, record) => {
+          const array = text || record[dataIndex] || [];
+          if (array.length)
+            return (
+              <RowNumber>
+                <LinkName>
+                  {array.length && `${array[0][displayExpr]}`}
+                </LinkName>
+                <Popover
+                  content={
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 4,
+                      }}
+                    >
+                      {map(array, (item) => (
+                        <Item key={item[keyExpr]}>
+                          <Link
+                            to={item?.url}
+                            onClick={() => onItemClick(item)}
+                          >
+                            {item[displayExpr]}
+                          </Link>
+                        </Item>
+                      ))}
+                    </div>
+                  }
+                  {...props}
+                >
+                  {popoverProps?.children || (
+                    <>
+                      {array?.length > 1 && (
+                        <LinkNumber>{`+${array?.length - 1}`}</LinkNumber>
+                      )}
+                    </>
+                  )}
+                </Popover>
+              </RowNumber>
+            );
+          return null;
+        };
       case 'string':
       default:
         return null;
     }
   }
 };
+
+const getSortValue = ({ order, field }) => {
+  switch (order) {
+    case 'descend':
+      return `-${field}`;
+    case 'ascend':
+      return `+${field}`;
+    default:
+      return undefined;
+  }
+};
+
 export function Table({
   insideTab = false,
   height = 'fix-scroll',
@@ -202,17 +345,15 @@ export function Table({
   const [paging, setPaging] = useState({ pageIndex, pageSize });
   const [tableHeight, setTableHeight] = useState(height);
   const tableRef = useRef(null);
-  const size = useWindowSize();
-
+  const size = useSize(document.querySelector('body'));
   useEffect(() => {
     if (pageIndex && pageSize) setPaging({ pageIndex, pageSize });
   }, [pageIndex, pageSize]);
-
   useEffect(() => {
     if (height === 'fix-scroll') {
       setTimeout(() => {
         let h = 0;
-        const items2 = document.querySelectorAll(
+        let items2 = document.querySelectorAll(
           customClassName
             ? `.${customClassName} .ant-table-thead`
             : '.ant-table-thead',
@@ -220,7 +361,7 @@ export function Table({
         for (let i = 0; i < items2.length; i++) {
           h += items2[i].clientHeight;
         }
-        const subHeight =
+        let subHeight =
           getScrollItemsHeight(insideTab) +
           offsetBottom +
           h +
@@ -231,7 +372,7 @@ export function Table({
     } else {
       setTimeout(() => {
         let h = 0;
-        const items2 = document.querySelectorAll(
+        let items2 = document.querySelectorAll(
           customClassName
             ? `.${customClassName} .ant-table-thead`
             : '.ant-table-thead',
@@ -245,7 +386,7 @@ export function Table({
     }
   }, [size?.width, height]);
   const indexRender = useCallback(
-    (item: any, record: any, index: number) => {
+    (item, record, index) => {
       return (
         ((paging?.pageIndex || 1) - 1) * (paging?.pageSize || 20) +
         index +
@@ -259,7 +400,6 @@ export function Table({
     width: '80px',
     sorter: false,
     align: 'left',
-    fixed: 'left',
     render: indexRender,
   };
   const cols = useMemo(() => {
@@ -267,8 +407,7 @@ export function Table({
     if (indexOption < 0) indexOption = columns.length;
     let d = [
       ...columns?.filter(
-        (i: { type: string }, index: number) =>
-          i?.type !== 'option' && index < indexOption,
+        (i, index) => i?.type !== 'option' && index < indexOption,
       ),
     ];
     if (showIndexCol) d = [indexCol, ...d];
@@ -279,9 +418,8 @@ export function Table({
     }));
   }, [columns, showIndexCol, indexRender, actions]);
 
-  const showTotal = (total: any, range: any[]) =>
+  const showTotal = (total, range) =>
     t('data.infoText', { 0: range[0], 1: range[1], 2: total });
-
   const defaultPaging = {
     position: ['bottomRight'],
     size: 'default',
@@ -298,30 +436,22 @@ export function Table({
     size: 'small',
   };
   const mergeProps = { ...defaultProps, ...rest };
-
-  const onTableChange = (
-    pagination: { current: any; pageSize: any },
-    filters: any,
-    sorter: any,
-    extra: { action: string },
-  ) => {
+  const onTableChange = (pagination, filters, sorter, extra) => {
     if (extra?.action == 'paginate') {
       setPaging({
         pageIndex: pagination.current,
         pageSize: pagination.pageSize,
       });
     }
-    onChange && onChange({ pagination, filters, sorter, extra });
+    let sort = getSortValue(sorter);
+    onChange && onChange({ pagination, filters, sorter, extra, sort });
   };
-
   return (
     <CustomGridData
       ref={tableRef}
       onChange={onTableChange}
       columns={cols}
-      scroll={{
-        y: size?.height > 600 ? tableHeight || 'auto' : 'auto',
-      }}
+      scroll={{ y: size?.height > 600 ? tableHeight || 'auto' : 'auto' }}
       {...mergeProps}
       pagination={pagination && { ...defaultPaging, ...pagination }}
     ></CustomGridData>

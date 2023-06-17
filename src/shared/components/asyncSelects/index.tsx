@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useDebounce } from 'react-use';
+import { useDebounce } from 'ahooks';
 import { isEqual, memoize } from 'lodash';
 
 // components
 import { Checkbox, Select } from 'antd';
-import Box from 'shared/components';
+import Box from 'shared/components/box';
 
 const Option = Select.Option;
 
@@ -29,7 +29,7 @@ type AsyncSelectType = {
   cacheLoadOptions?: boolean;
 };
 
-export const AsyncSelect: React.FC<AsyncSelectType> = (props) => {
+const AsyncSelect: React.FC<AsyncSelectType> = (props) => {
   const {
     value,
     multiple,
@@ -162,3 +162,5 @@ export const AsyncSelect: React.FC<AsyncSelectType> = (props) => {
     </Select>
   );
 };
+
+export default AsyncSelect;
